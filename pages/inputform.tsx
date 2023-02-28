@@ -14,6 +14,8 @@ function InputForm() {
   // console.log(e.target.title.value);
   const [toDo, setToDo] = React.useState([]);
   const [success, setSuccess] = React.useState("");
+  const [failed, setFailed] = React.useState("");
+  const [loading, setLoading] = React.useState("");
   React.useEffect(() => {
     fetchData();
   }, []);
@@ -28,35 +30,44 @@ function InputForm() {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    await fetch("https://jsonplaceholder.typicode.com/todos", {
-      method: "POST",
-      body: JSON.stringify({
-        title: e.target.title.value,
-        completed: false,
-      }),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-      },
-    })
-      .then((res) => {
-        if (res.status !== 201) {
-          return;
-        } else {
-          return res.json();
-        }
+    if (e.target.title.value) {
+      setLoading("Loading..");
+      await fetch("https://jsonplaceholder.typicode.com/todos", {
+        method: "POST",
+        body: JSON.stringify({
+          title: e.target.title.value,
+          completed: false,
+        }),
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
       })
-      .then((data) => {
-        // console.log(data)
-        setToDo((toDo): any => [...toDo, data]);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    setSuccess("Add to do successfully!");
-    setTimeout(() => {
-      setSuccess("");
-      e.target.title.value = "";
-    }, 3000);
+        .then((res) => {
+          if (res.status !== 201) {
+            return;
+          } else {
+            return res.json();
+          }
+        })
+        .then((data) => {
+          // console.log(data)
+          setToDo((toDo): any => [...toDo, data]);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      setLoading("");
+      setSuccess("Add to do successfully!");
+      setTimeout(() => {
+        setSuccess("");
+        e.target.title.value = "";
+      }, 3000);
+    } else {
+      setFailed("Please input Title!");
+      setTimeout(() => {
+        setFailed("");
+      }, 3000);
+    }
   };
   console.log(success);
   return (
@@ -95,6 +106,16 @@ function InputForm() {
             {success && (
               <div className="w-full bg-green-400 text-center text-white rounded-lg font-bold p-2">
                 {success}
+              </div>
+            )}
+            {failed && (
+              <div className="w-full bg-red-400 text-center text-white rounded-lg font-bold p-2">
+                {failed}
+              </div>
+            )}
+            {loading && (
+              <div className="w-full bg-yellow-300 text-center text-white rounded-lg font-bold p-2">
+                {loading}
               </div>
             )}
           </div>
